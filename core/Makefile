@@ -22,11 +22,6 @@ LOCAL_PATH := $(BUILD_SYSTEM)
 # src:dest pair is the first one to match the same dest"
 #$(1): the src:dest pair
 #$(2): the dest
-define check-product-copy-files
-$(if $(filter-out $(TARGET_COPY_OUT_SYSTEM_OTHER)/%,$(2)), \
-  $(if $(filter %.apk, $(2)),$(error \
-     Prebuilt apk found in PRODUCT_COPY_FILES: $(1), use BUILD_PREBUILT instead!)))
-endef
 # filter out the duplicate <source file>:<dest file> pairs.
 unique_product_copy_files_pairs :=
 $(foreach cf,$(PRODUCT_COPY_FILES), \
