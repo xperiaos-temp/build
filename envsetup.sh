@@ -75,13 +75,13 @@ function check_product()
         echo "Couldn't locate the top of the tree.  Try setting TOP." >&2
         return
     fi
-    if (echo -n $1 | grep -q -e "^gzosp_") ; then
-        GZOSP_BUILD=$(echo -n $1 | sed -e 's/^gzosp_//g')
-        export BUILD_NUMBER=$( (date +%s%N ; echo $GZOSP_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10 )
+    if (echo -n $1 | grep -q -e "^xperia_") ; then
+        XPERIA_BUILD=$(echo -n $1 | sed -e 's/^xperia_//g')
+        export BUILD_NUMBER=$( (date +%s%N ; echo $XPERIA_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10 )
     else
-        GZOSP_BUILD=
+        XPERIA_BUILD=
     fi
-    export GZOSP_BUILD
+    export XPERIA_BUILD
 
         TARGET_PRODUCT=$1 \
         TARGET_BUILD_VARIANT= \
@@ -539,7 +539,7 @@ function print_lunch_menu()
         i=$(($i+1))
     done | column
 
-    if [ "z${GZOSP_DEVICES_ONLY}" != "z" ]; then
+    if [ "z${XPERIA_DEVICES_ONLY}" != "z" ]; then
        echo "... and don't forget the bacon!"
     fi
 
@@ -550,7 +550,7 @@ function brunch()
 {
     breakfast $*
     if [ $? -eq 0 ]; then
-        mka gzosp
+        mka xperia
     else
         echo "No such item in brunch menu. Try 'breakfast'"
         return 1
@@ -568,10 +568,10 @@ function breakfast()
 {
     target=$1
     local variant=$2
-    GZOSP_DEVICES_ONLY="true"
+    XPERIA_DEVICES_ONLY="true"
     unset LUNCH_MENU_CHOICES
     add_lunch_combo full-eng
-    for f in `/bin/ls vendor/gzosp/vendorsetup.sh 2> /dev/null`
+    for f in `/bin/ls vendor/xperia/vendorsetup.sh 2> /dev/null`
         do
             echo "including $f"
             . $f
@@ -587,11 +587,11 @@ function breakfast()
             # A buildtype was specified, assume a full device name
             lunch $target
         else
-            # This is probably just the GZOSP model name
+            # This is probably just the Xperia model name
             if [ -z "$variant" ]; then
                 variant="userdebug"
             fi
-            lunch gzosp_$target-$variant
+            lunch xperia_$target-$variant
         fi
     fi
     return $?
@@ -641,13 +641,13 @@ function lunch()
     check_product $product
     if [ $? -ne 0 ]
     then
-        # if we can't find a product, try to grab it off the Gzosp GitHub
+        # if we can't find a product, try to grab it off the XperiaOS GitHub
         T=$(gettop)
         cd $T > /dev/null
         if [[ $NO_ROOMSERVICE == true ]]; then
             echo "Roomservice turned off, type in 'export NO_ROOMSERVICE=false' if you want it back on"
         else
-            vendor/gzosp/build/tools/roomservice.py $product
+            vendor/xperia/build/tools/roomservice.py $product
         fi
         cd - > /dev/null
         check_product $product
@@ -1640,13 +1640,13 @@ function reposync() {
 
 function repopick() {
     T=$(gettop)
-    $T/vendor/gzosp/build/tools/repopick.py $@
+    $T/vendor/xperia/build/tools/repopick.py $@
 }
 
 function fixup_common_out_dir() {
     common_out_dir=$(get_build_var OUT_DIR)/target/common
     target_device=$(get_build_var TARGET_DEVICE)
-    if [ ! -z $GZOSP_FIXUP_COMMON_OUT ]; then
+    if [ ! -z $XPERIA_FIXUP_COMMON_OUT ]; then
         if [ -d ${common_out_dir} ] && [ ! -L ${common_out_dir} ]; then
             mv ${common_out_dir} ${common_out_dir}-${target_device}
             ln -s ${common_out_dir}-${target_device} ${common_out_dir}
@@ -1691,7 +1691,7 @@ function installboot()
     sleep 1
     adb wait-for-online shell mount /system 2>&1 > /dev/null
     adb wait-for-online remount
-    if (adb shell getprop ro.gzosp.device | grep -q "$GZOSP_BUILD");
+    if (adb shell getprop ro.xperia.device | grep -q "$XPERIA_BUILD");
     then
         adb push $OUT/boot.img /cache/
         for i in $OUT/system/lib/modules/*;
@@ -1702,7 +1702,7 @@ function installboot()
         adb shell chmod 644 /system/lib/modules/*
         echo "Installation complete."
     else
-        echo "The connected device does not appear to be $GZOSP_BUILD, run away!"
+        echo "The connected device does not appear to be $XPERIA_BUILD, run away!"
     fi
 }
 
@@ -1736,13 +1736,13 @@ function installrecovery()
     sleep 1
     adb wait-for-online shell mount /system 2>&1 > /dev/null
     adb wait-for-online remount
-    if (adb shell getprop ro.gzosp.device | grep -q "$GZOSP_BUILD");
+    if (adb shell getprop ro.xperia.device | grep -q "$XPERIA_BUILD");
     then
         adb push $OUT/recovery.img /cache/
         adb shell dd if=/cache/recovery.img of=$PARTITION
         echo "Installation complete."
     else
-        echo "The connected device does not appear to be $GZOSP_BUILD, run away!"
+        echo "The connected device does not appear to be $XPERIA_BUILD, run away!"
     fi
 }
 
@@ -1762,7 +1762,7 @@ function dopush()
         echo "Device Found."
     fi
 
-    if (adb shell getprop ro.gzosp.device | grep -q "$GZOSP_BUILD") || [ "$FORCE_PUSH" == "true" ];
+    if (adb shell getprop ro.xperia.device | grep -q "$XPERIA_BUILD") || [ "$FORCE_PUSH" == "true" ];
     then
     # retrieve IP and PORT info if we're using a TCP connection
     TCPIPPORT=$(adb devices | egrep '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+[^0-9]+' \
@@ -1868,7 +1868,7 @@ EOF
     rm -f $OUT/.log
     return 0
     else
-        echo "The connected device does not appear to be $GZOSP_BUILD, run away!"
+        echo "The connected device does not appear to be $XPERIA_BUILD, run away!"
     fi
 }
 
@@ -2029,4 +2029,4 @@ addcompletions
 
 export ANDROID_BUILD_TOP=$(gettop)
 
-. $ANDROID_BUILD_TOP/vendor/gzosp/build/envsetup.sh
+. $ANDROID_BUILD_TOP/vendor/xperia/build/envsetup.sh

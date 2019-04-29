@@ -30,18 +30,14 @@ PRODUCT_PACKAGES += \
     CalendarProvider \
     CaptivePortalLogin \
     CertInstaller \
-    Contacts \
-    DeskClock \
     DocumentsUI \
     DownloadProviderUi \
-    Email \
     ExactCalculator \
     ExternalStorageProvider \
     FusedLocation \
     InputDevices \
     KeyChain \
     Keyguard \
-    Launcher3QuickStep \
     ManagedProvisioning \
     MtpDocumentsProvider \
     PacProcessor \
